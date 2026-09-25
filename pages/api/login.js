@@ -6,7 +6,7 @@ export default function handler(req, res) {
   }
   res.setHeader(
     "Set-Cookie",
-    `session=${password}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax; Secure`
+    `session=${encodeURIComponent(password)}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax; Secure`
   );
   res.status(200).json({ ok: true });
 }
