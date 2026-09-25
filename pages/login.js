@@ -1,23 +1,31 @@
 import { useState } from "react";
-import { useRouter } from "next/router";
 
 export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   async function submit(e) {
     e.preventDefault();
     setError("");
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    if (res.ok) {
-      router.push("/dashboard");
-    } else {
-      setError("Mot de passe incorrect");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      if (res.ok) {
+        // Navigation complète (pas de client-side routing) pour éviter
+        // l'erreur "Loading initial props cancelled" de Next.js.
+        window.location.href = "/dashboard";
+      } else {
+        setError("Mot de passe incorrect");
+        setLoading(false);
+      }
+    } catch (err) {
+      setError("Erreur réseau, réessaie.");
+      setLoading(false);
     }
   }
 
@@ -34,8 +42,11 @@ export default function Login() {
           className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-white/30 outline-none focus:border-brand-400 mb-3"
         />
         {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
-        <button className="w-full bg-brand-500 hover:bg-brand-600 transition rounded-lg py-3 font-medium text-white">
-          Se connecter
+        <button
+          disabled={loading}
+          className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-50 transition rounded-lg py-3 font-medium text-white"
+        >
+          {loading ? "Connexion…" : "Se connecter"}
         </button>
       </form>
     </div>
